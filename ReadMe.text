@@ -1,0 +1,88 @@
+Design Brief:
+
+    My assignment 1 has implemented each client accessing their own stack. This is done through a static HashMap (Keys = ClientID, data = Stack). When a client accesses the server,
+    they provide their clientId through the command line (arg[0]), and this ID will be used to createStack(); creating a stack and placing it on the hashmap, and also getStack()
+    which will retrieve the stack belonging to a client via reading their ID and passing it to the hashmap. A reference to the client's individual stack within the hashmap is kept by
+    a static variable on the server (cStack), which is how the client will access and manipulate their stack, having all changes saved to the hashmap. cStack is a shared variable and hence the critical section.
+
+    All files have been compiled and run in java 8.
+
+Potential Issue:
+
+    Because this static variable "cStack" is shared by all clients connecting to the server, if two clients were to connect simultaneously, a race condition may occur where;
+
+    Client 1 thread createStack()
+    Client 2 thread createStack()
+    Client 1 thread getStack() - where cStack is now a reference to client 1's stack
+    client 2 thread getStack() - where cStack is now a reference to client 2's stack
+    Client 1 thread pushVal()
+
+    If this sequence of events were to occur, then client 1 would actually be pushing a value onto client 2's stack. 
+
+    Hence that is why the syncCall() method, a synchronised remote method, which is implemented in "SorterImplementation" and inherited by the server, is used. 
+    All clients make any request to the server through this single synCall() method, so all their requests are Synchronized server side. 
+    This means that clients will always get their designated stack, and manipulate that stack only.
+
+SorterClient will be the driver for all clients:
+    
+    this file includes a switch statement which takes static variable "funcRequest" as an expression. funcRequest will be determined by arg[1], meaning at CLI, user can just type
+    either push, pushop (for pushoperator), pop, delaypop, isEmpty, or print to access these functions. arg[2] will be logically determined by what method the user
+    requests with arg[1] at the CLI. 
+    arg[0] ALWAYS determines client ID and which client's stack the user wants to create/access. As every client will have its own stack on the server,
+    clients stack's can be accessed at a later time (this is so long as the server has been up to the save the stack to the hashmap).
+
+    EXAMPLES OF CLI command: 
+    
+    1. "java SorterClient 1 push 20" - where arg[0] = "1" denotes the client ID, arg[1] = push denotes which method to call, and arg[2] = 20, is logically determined to be a value to be pushed.
+    2. "java SorterClient 2 pushop ascending" - where arg[0] = "2" denotes client ID, arg[1] = pushop denotes pushOperator() method, and arg[2] = ascending, is logcailly determined to be the operator parameter.
+    3. "java SorterClient 3 pop" - in this exampe, as pop does not require a parameter, arg[2] is logically determined to be empty.
+
+SorterServer is the server program:
+
+    I use createregistry() instead of getregistry(), so it doesn't require any initial rmiregistry starting from the command line. Instead,
+    the rmiregistry will automatically start when server program starts (it will live and die with the server program).
+    I intend to have the script run "java SorterServer &", forcing it to the background, so that Server and Clients can be run on a single terminal.
+
+dummyConcurrentTester1, 2, & 3:
+
+    These are files used to test whether the client threads have been synchronized server side. 
+    They each run a 50000 iteration loop, where they just continuously push() (using the syncCall() method) a single number to their own stack. 
+    The ints they push are 100, 99, & 200, these should NOT show up in output.txt or ExpectedOutput.txt.
+    I run them in the background (&) while also running SorterClient.java in order to see if there is any incosistency between client stacks due to the race condition
+    detailed above. On my hardware, 50000 iterations gives enough time to test SorterClient.java against these dummyConcurrentTesters. However, i'm not sure if this will
+    be too many iterations for the tester's hardware, or too little. If these dummyTesters finish too quickly, then the iterations will have to be increased, if they
+    take too long, then iterations decreased.
+
+    These ConcurrentTesters have been designated client ID 4, 5, & 6, so if they are running, stacks attached to hash key 4, 5, & 6 will belong to them and just be filled with
+    the same repeating number.
+
+    This can actually be viewed after the script runs, by "java SorterClient 4 print" (replacing number with desired clientID) as they all access the same hashmap on the server.
+
+Testing:
+
+    Testing is done through a bash script which will Start the server and push it to the background (&), start 3 dummyConcurrentTester programs and push them to the background(&),
+    then start running SorterClient with various command line inputs to show the following:
+
+        1. All specified functionality works
+        2. Running clients simultaneously does not lead to inconsistency in client stacks
+        3. This project supports client's having their own stack on the server, which is saved to the hashmap and can be retrieved later on, even after other clients have pushed requests through.
+
+        The script will only run SorterClient with Id's 1, 2, & 3 so that it isn't interfering with the dummyConcurrentTesters.
+        All up there are 6 clients running, 3 from SorterClient, and 3 from the dummyConcurrentTesters.
+
+        The script also sleeps for 3 seconds at the beginning, this is just to allow enough time for the server to start before client's are trying to connect to it.
+
+INSTRUCTIONS:
+
+    files are all in a default directory, to compile just "javac *.java". Once all 7 files have been compiled, then just run the script via "./script.sh".
+    The script will start everything (including the server), catenate the output to "output.txt" and then diff output.txt with ExpectedOutput.txt.
+    Server and client both run on default 1099 port.
+    
+    Since the script starts the server, this means that in order to run the script again, one must "kill -9 serverprocessID"
+
+    The tester alternatively, could conduct their own tests by not running the script, manually starting the server "java SorterServer &" and then just using CLI to input whatever they desire
+    (following instructions given above in the SorterClient explination section).
+
+    Additionally, if the tester does not require the 3 dummyConcurrentTesters to be running, they can edit the script and delete them.
+    
+    

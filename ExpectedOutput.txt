@@ -1,0 +1,37 @@
+Client 1: true
+Client 1: false
+Client 1: [30, 33, 50, 11, 12, 21]<-- top of stack
+Client 1: 21
+Client 1: [30, 33, 50, 11, 12]<-- top of stack
+Client 1: [50, 33, 30, 12, 11]<-- top of stack
+Client 2: true
+Client 2: [3, 7, 11, 21, 101, 93]<-- top of stack
+Client 2: [3, 7, 11, 21, 93, 101]<-- top of stack
+Client 1: [50, 33, 30, 12, 11]<-- top of stack
+Client 1: [11]<-- top of stack
+Client 2: [101]<-- top of stack
+Client 3: true
+Client 3: [3, 50, -5, 77]<-- top of stack
+Client 3: 77
+Client 3: [-5]<-- top of stack
+Client 1: [11]<-- top of stack
+Client 2: [101]<-- top of stack
+Client 3: false
+Client 1: [11, 21, 83, 52, 107]<-- top of stack
+Client 1: [11, 21, 52, 83, 107]<-- top of stack
+Client 1: 107
+Client 1: 83
+Client 1: 52
+Client 2: [101, 303, 25, 211, 63, -38]<-- top of stack
+Client 2: [303, 211, 101, 63, 25, -38]<-- top of stack
+Client 2: -38
+Client 2: 25
+Client 2: 63
+Client 2: 101
+Client 2: 211
+Client 2: 303
+Client 1: [11, 21]<-- top of stack
+Client 2: []<-- top of stack
+Client 3: [-5]<-- top of stack
+Client 2: true
+Client 1: false
